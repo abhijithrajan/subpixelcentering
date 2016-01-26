@@ -1,0 +1,1 @@
+#Algorithm to center and align images
