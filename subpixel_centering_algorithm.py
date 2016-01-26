@@ -110,21 +110,3 @@ def doRotation(image, n_angles, boxsize, satradius, debug):
 	return ( result, lcx, lcy, oxb, oyb )
 
 #==================================================================================================================
-def main():
-
-	nameslist, xcoord, ycoord = np.loadtxt('coord.dat', unpack=True, dtype='S40,f,f')
-
-	for names, xcoo, ycoo in zip(nameslist, xcoord, ycoord):
-		im, hdr = pf.getdata(names[:-5]+'_skysub.fits', header=True)
-		tmp = np.copy(im)[ycoo-40:ycoo+40, xcoo-40:xcoo+40]
-
-		yc, xc =  np.unravel_index(tmp.argmax(), tmp.shape)
-		yc, xc = yc - 40 + ycoo,  xc - 40 + xcoo
-		tmp = np.copy(im)[yc-128:yc+128, xc-128:xc+128]
-
-		subpix_centration_allangles(tmp, names[:-5]+'_skysub_aligned.fits', boxsize=128, header=hdr, perfect=0.1)#, debug=False)#, satradius=12)#
-	
-
-#==================================================================================================================
-if __name__ == '__main__':
-	main()
