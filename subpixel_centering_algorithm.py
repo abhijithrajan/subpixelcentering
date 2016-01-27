@@ -28,12 +28,13 @@ def subpix_centration_allangles(image, imname, n_angles=36, boxsize=128, **kwarg
 	debug = kwargs.get( 'debug', False )
 	header = kwargs.get( 'header', False )
 
+	origimg = np.copy( image )
 	result, lcx, lcy, oxb, oyb = doRotation(image, n_angles, boxsize, satradius, debug)
 	print 'Center of rotational symmetry: ', lcx+oxb, lcy+oyb
 
 	if tol: #tolerance -- size of offset allowed to be ~ zero
-		origimg, image = np.copy( result ), np.copy( result )
-		totoffx, totoffy = 0., 0. 
+		image = np.copy( result )
+		totoffx, totoffy = oxb, oyb
 		count = 0
 		while (abs(oxb) > tol) or (abs(oyb) > tol) :
 			tmpimg, lcx, lcy, oxb, oyb = doRotation( image, n_angles, boxsize, satradius, debug)
