@@ -9,3 +9,10 @@ The algorithm depends on the rotational symmetry of the point spread function. T
 The code currently tests rotations over 36 different angles i.e. from 5 to 355 degrees and checks for rotational symmetry in 10 deg. increments and finds the average best centroid -- returns the image centered there.
 
 Limitation of the current code is that improving the centering is done by a brute force grid search and is slow. Future work will focus on improving this.
+
+##Dependencies
+numpy
+scipy
+astropy
+python2.7 
+scikit-image (if masking the saturated core)
