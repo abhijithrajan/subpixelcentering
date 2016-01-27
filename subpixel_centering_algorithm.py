@@ -1,14 +1,13 @@
 #==================================================================================================================
-import numpy as np
-import astropy.io.fits as pf
-import matplotlib.pyplot as plt
-from scipy.ndimage.interpolation import shift, rotate
-from skimage import draw
-
-#==================================================================================================================
 def subpix_centration_allangles(image, imname, n_angles=36, boxsize=128, **kwargs): 
 	'''
-		image: image to align
+		This algorithm is used to center saturated images to subpixel accuracy depending on the 
+		rotational symmetry of the Point Spread Function (PSF). 
+
+		The input image should be aligned within ~1 px to start since the grid search is conducted 
+		within a +/- 1 pixel region around the center (cx, cy) of the image.
+
+		image: input image to align
 		imname: name of final output image
 		header: header information to include in the final image
 		n_angles: number of angles over which to minimize the residuals and calculate the centroid
@@ -17,7 +16,12 @@ def subpix_centration_allangles(image, imname, n_angles=36, boxsize=128, **kwarg
 			if not specified code exits after a single iteration.
 		boxsize: box size (diameter) within which to measure stddev (default 128 pix diam)
 		debug: print debug info messages and plots
+		v0 in IDL by Katie Morzinski (ktmorz at arizona dot edu) : 2013 May 19
+		v1 converted to python by Abhijith Rajan (arajan6 at asu dot edu) : 2016 Jan 20
 	'''
+	import numpy as np
+	import astropy.io.fits as pf
+	from scipy.ndimage.interpolation import shift, rotate
 
 	satradius = kwargs.get( 'satradius', False )
 	tol = kwargs.get( 'tol', False )
@@ -27,22 +31,38 @@ def subpix_centration_allangles(image, imname, n_angles=36, boxsize=128, **kwarg
 	result, lcx, lcy, oxb, oyb = doRotation(image, n_angles, boxsize, satradius, debug)
 	print 'Center of rotational symmetry: ', lcx+oxb, lcy+oyb
 
-	image = np.copy( result )
 	if tol: #tolerance -- size of offset allowed to be ~ zero
+		origimg, image = np.copy( result ), np.copy( result )
+		totoffx, totoffy = 0., 0. 
 		count = 0
 		while (abs(oxb) > tol) or (abs(oyb) > tol) :
-			result, lcx, lcy, oxb, oyb = doRotation( image, n_angles, boxsize, satradius, debug)
+			tmpimg, lcx, lcy, oxb, oyb = doRotation( image, n_angles, boxsize, satradius, debug)
 			count += 1
 			print count,' = # Additional attempts to improve centering (within tolerance: ', tol ,'pix)'
 			print 'Offset from rotational symmetry: ', oxb, oyb
 
-			image = np.copy( result )
+			totoffx += oxb
+			totoffy += oyb
+			image = np.copy( tmpimg )
 		print 'Exiting "improved centering" while loop, Center of rotational symmetry: ', lcx+oxb, lcy+oyb
+		result = shift( origimg, (-totoffy, -totoffx), order=5 ) # Using offsets estimated previously to generate final centered image.
+
 	if not header: pf.writeto(imname, result, clobber=True)
 	else: pf.writeto(imname, result, header=header, clobber=True)
 
+	return
+
 #==================================================================================================================
 def doRotation(image, n_angles, boxsize, satradius, debug):
+	'''
+		This is the function to carry out a single iteration to find the center. 
+		Created by Abhijith Rajan: 2016 Jan 25 
+	'''
+	import numpy as np
+	from scipy.ndimage.interpolation import shift, rotate
+	from skimage import draw
+	import matplotlib.pyplot as plt
+
 	targim = np.copy( image )
 	target_image = np.copy( image )
 
