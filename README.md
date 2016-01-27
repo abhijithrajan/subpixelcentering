@@ -1,4 +1,4 @@
-##Algorithm for subpixel centering of saturated point spread functions
+##Subpixel centering of saturated point spread functions
 
 High contrast imaging searches for exoplanets typically use algorithms that require the knowledge of the star center to subpixel accuracy. For many instruments this problem is complicated by the fact that the star center is either a) saturated, or b) masked by a coronagraph.
 
