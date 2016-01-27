@@ -9,14 +9,18 @@ from skimage import draw
 def subpix_centration_allangles(image, imname, n_angles=36, boxsize=128, **kwargs): 
 	'''
 		image: image to align
+		imname: name of final output image
+		header: header information to include in the final image
+		n_angles: number of angles over which to minimize the residuals and calculate the centroid
 		satradius: radius of saturated data to ignore
-		perfect: iterate until the exact center is found to fraction of pix specified perfect=0.1
+		tol: tolerance iterate until the exact center is found to fraction of pix specified, 
+			if not specified code exits after a single iteration.
 		boxsize: box size (diameter) within which to measure stddev (default 128 pix diam)
-		debug: print debug info messages
+		debug: print debug info messages and plots
 	'''
 
 	satradius = kwargs.get( 'satradius', False )
-	perfect = kwargs.get( 'perfect', False )
+	tol = kwargs.get( 'tol', False )
 	debug = kwargs.get( 'debug', False )
 	header = kwargs.get( 'header', False )
 
@@ -24,17 +28,16 @@ def subpix_centration_allangles(image, imname, n_angles=36, boxsize=128, **kwarg
 	print 'Center of rotational symmetry: ', lcx+oxb, lcy+oyb
 
 	image = np.copy( result )
-	if perfect:
-		tol = perfect  #tolerance -- size of offset allowed to be ~ zero
+	if tol: #tolerance -- size of offset allowed to be ~ zero
 		count = 0
 		while (abs(oxb) > tol) or (abs(oyb) > tol) :
 			result, lcx, lcy, oxb, oyb = doRotation( image, n_angles, boxsize, satradius, debug)
 			count += 1
-			print count,' = #Additional attempts to get perfect (within tolerance: ', tol ,'pix)'
+			print count,' = # Additional attempts to improve centering (within tolerance: ', tol ,'pix)'
 			print 'Offset from rotational symmetry: ', oxb, oyb
 
 			image = np.copy( result )
-		print 'Exiting Perfect while loop, Center of rotational symmetry: ', lcx+oxb, lcy+oyb
+		print 'Exiting "improved centering" while loop, Center of rotational symmetry: ', lcx+oxb, lcy+oyb
 	if not header: pf.writeto(imname, result, clobber=True)
 	else: pf.writeto(imname, result, header=header, clobber=True)
 
