@@ -2,7 +2,7 @@
 
 High contrast imaging searches for exoplanets typically use algorithms that require the knowledge of the star center to subpixel accuracy. For many instruments this problem is complicated by the fact that the star center is either a) saturated, or b) masked by a coronagraph.
 
-The code presented here is converted to Python from an IDL script by Katie Morzinski, described in Morzinski et al. (2015), ApJ, 815, 108.
+The code presented here is converted to Python from an IDL script by Katie Morzinski, described in [Morzinski et al. (2015), ApJ, 815, 108](http://adsabs.harvard.edu/abs/2015ApJ...815..108M)
 
 The algorithm depends on the rotational symmetry of the point spread function. That is to find the center that minimizes the residuals of differenced images over multiple rotation angles. Centers images to subpixel accuracy (for saturated images) by shifting by subpixel (tenth of pixel, from +/- 1 pixel around center). 
 
